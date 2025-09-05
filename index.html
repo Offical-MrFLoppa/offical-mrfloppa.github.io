@@ -22,8 +22,16 @@
             overflow: hidden;
         }
         
-        .game-container {
+        .container {
             width: 1000px;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .game-container {
+            width: 100%;
             height: 600px;
             background-color: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
@@ -117,13 +125,11 @@
         }
         
         .controls {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
             color: white;
             background-color: rgba(0, 0, 0, 0.5);
             padding: 10px;
             border-radius: 5px;
+            text-align: center;
         }
         
         .message {
@@ -158,33 +164,75 @@
             background-color: #7f8c8d;
             border-radius: 5px;
         }
+        
+        .connection-panel {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .connection-panel input, .connection-panel button {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        .connection-panel button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .connection-panel button:hover {
+            background-color: #2980b9;
+        }
+        
+        .server-info {
+            display: flex;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="game-area" id="gameArea">
-            <div class="game-title">2D Мультиплеер</div>
-            <!-- Игроки будут добавляться здесь -->
+    <div class="container">
+        <div class="connection-panel">
+            <h2>Подключение к серверу</h2>
+            <div class="server-info">
+                <input type="text" id="serverUrl" placeholder="URL сервера" value="wss://example.com/game">
+                <button id="connectButton">Подключиться</button>
+            </div>
+            <div id="connectionStatus">Статус: Не подключено</div>
         </div>
         
-        <div class="chat-area">
-            <div class="chat-messages" id="chatMessages">
-                <div class="message">
-                    <span class="sender">Система:</span>
-                    <span class="text">Добро пожаловать в игру! Используйте WASD для движения.</span>
-                </div>
+        <div class="game-container">
+            <div class="game-area" id="gameArea">
+                <div class="game-title">2D Мультиплеер</div>
+                <!-- Игроки будут добавляться здесь -->
             </div>
             
-            <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Введите сообщение...">
-                <button id="sendButton">Отпр.</button>
+            <div class="chat-area">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message">
+                        <span class="sender">Система:</span>
+                        <span class="text">Добро пожаловать в игру! Используйте WASD для движения.</span>
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Введите сообщение...">
+                    <button id="sendButton">Отпр.</button>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="controls">
-        Управление: WASD<br>
-        Игрок: <span id="playerName">Вы</span>
+        
+        <div class="controls">
+            Управление: WASD | Игрок: <span id="playerName">Не подключен</span> | Статус: <span id="playerStatus">Не в игре</span>
+        </div>
     </div>
 
     <script>
@@ -194,12 +242,20 @@
             const chatInput = document.getElementById('chatInput');
             const sendButton = document.getElementById('sendButton');
             const playerNameDisplay = document.getElementById('playerName');
+            const playerStatusDisplay = document.getElementById('playerStatus');
+            const connectButton = document.getElementById('connectButton');
+            const serverUrlInput = document.getElementById('serverUrl');
+            const connectionStatus = document.getElementById('connectionStatus');
+            
+            // Переменные для управления игрой
+            let players = {};
+            let currentPlayerId = null;
+            let socket = null;
             
             // Генерация случайного имени игрока
             const adjectives = ['Быстрый', 'Смелый', 'Ловкий', 'Хитрый', 'Сильный', 'Невидимый', 'Отважный'];
             const nouns = ['Воин', 'Странник', 'Игрок', 'Путник', 'Герой', 'Следопыт', 'Маг'];
             const randomName = adjectives[Math.floor(Math.random() * adjectives.length)] + ' ' + nouns[Math.floor(Math.random() * nouns.length)];
-            playerNameDisplay.textContent = randomName;
             
             // Создаем препятствия
             function createObstacles() {
@@ -220,20 +276,124 @@
             
             createObstacles();
             
-            // Создаем игрока
-            const player = createPlayer(randomName, gameArea.offsetWidth / 2, gameArea.offsetHeight / 2, true);
-            gameArea.appendChild(player);
+            // Функция подключения к серверу
+            function connectToServer() {
+                const serverUrl = serverUrlInput.value;
+                if (!serverUrl) {
+                    addMessage('Система', 'Введите URL сервера');
+                    return;
+                }
+                
+                try {
+                    // Здесь будет код подключения к WebSocket серверу
+                    // socket = new WebSocket(serverUrl);
+                    
+                    // Имитация подключения (в реальном приложении удалите эту часть)
+                    connectionStatus.textContent = 'Статус: Подключение...';
+                    setTimeout(() => {
+                        connectionStatus.textContent = 'Статус: Подключено';
+                        playerStatusDisplay.textContent = 'В игре';
+                        playerNameDisplay.textContent = randomName;
+                        
+                        // Создаем игрока после "подключения"
+                        currentPlayerId = 'player_' + Date.now();
+                        players[currentPlayerId] = createPlayer(randomName, gameArea.offsetWidth / 2, gameArea.offsetHeight / 2, true);
+                        gameArea.appendChild(players[currentPlayerId]);
+                        
+                        addMessage('Система', 'Подключение к серверу успешно!');
+                    }, 1000);
+                    
+                    // Обработчики событий WebSocket (закомментировано для примера)
+                    /*
+                    socket.onopen = function(event) {
+                        connectionStatus.textContent = 'Статус: Подключено';
+                        playerStatusDisplay.textContent = 'В игре';
+                        
+                        // Отправляем серверу информацию о новом игроке
+                        socket.send(JSON.stringify({
+                            type: 'join',
+                            name: randomName,
+                            x: gameArea.offsetWidth / 2,
+                            y: gameArea.offsetHeight / 2
+                        }));
+                    };
+                    
+                    socket.onmessage = function(event) {
+                        const data = JSON.parse(event.data);
+                        processServerMessage(data);
+                    };
+                    
+                    socket.onclose = function(event) {
+                        connectionStatus.textContent = 'Статус: Отключено';
+                        playerStatusDisplay.textContent = 'Не в игре';
+                        addMessage('Система', 'Соединение с сервером разорвано');
+                    };
+                    
+                    socket.onerror = function(error) {
+                        connectionStatus.textContent = 'Статус: Ошибка подключения';
+                        addMessage('Система', 'Ошибка подключения к серверу: ' + error.message);
+                    };
+                    */
+                } catch (error) {
+                    connectionStatus.textContent = 'Статус: Ошибка подключения';
+                    addMessage('Система', 'Ошибка: ' + error.message);
+                }
+            }
             
-            // Создаем несколько NPC для демонстрации
-            createNPC('Зеленый Воин', 100, 100, '#2ecc71');
-            createNPC('Синий Странник', 300, 200, '#3498db');
-            createNPC('Красный Маг', 500, 350, '#e74c3c');
-            createNPC('Желтый Путник', 200, 400, '#f1c40f');
+            // Обработка сообщений от сервера
+            function processServerMessage(data) {
+                switch (data.type) {
+                    case 'player_joined':
+                        if (data.id !== currentPlayerId) {
+                            players[data.id] = createPlayer(data.name, data.x, data.y);
+                            gameArea.appendChild(players[data.id]);
+                            addMessage('Система', data.name + ' присоединился к игре');
+                        }
+                        break;
+                    case 'player_left':
+                        if (players[data.id]) {
+                            gameArea.removeChild(players[data.id]);
+                            delete players[data.id];
+                            addMessage('Система', data.name + ' покинул игру');
+                        }
+                        break;
+                    case 'player_moved':
+                        if (players[data.id] && data.id !== currentPlayerId) {
+                            players[data.id].style.left = data.x + 'px';
+                            players[data.id].style.top = data.y + 'px';
+                            updatePlayerDirection(players[data.id], data.dx, data.dy);
+                        }
+                        break;
+                    case 'chat_message':
+                        addMessage(data.name, data.message);
+                        break;
+                    case 'player_list':
+                        // Обработка списка игроков уже находящихся на сервере
+                        data.players.forEach(player => {
+                            if (player.id !== currentPlayerId) {
+                                players[player.id] = createPlayer(player.name, player.x, player.y);
+                                gameArea.appendChild(players[player.id]);
+                            }
+                        });
+                        break;
+                }
+            }
             
             // Обработка ввода с клавиатуры
             const keys = {};
             document.addEventListener('keydown', function(e) {
                 keys[e.key.toLowerCase()] = true;
+                
+                // Фокус на поле ввода чата при нажатии Enter
+                if (e.key === 'Enter' && e.target !== chatInput) {
+                    chatInput.focus();
+                    e.preventDefault();
+                }
+                
+                // Выход из поля ввода чата при нажатии Escape
+                if (e.key === 'Escape' && e.target === chatInput) {
+                    chatInput.blur();
+                }
             });
             
             document.addEventListener('keyup', function(e) {
@@ -242,41 +402,67 @@
             
             // Движение игрока
             const speed = 5;
-            function movePlayer() {
-                let dx = 0;
-                let dy = 0;
-                
-                if (keys['w']) dy -= speed;
-                if (keys['s']) dy += speed;
-                if (keys['a']) dx -= speed;
-                if (keys['d']) dx += speed;
-                
-                if (dx !== 0 || dy !== 0) {
-                    const x = parseInt(player.style.left || 0) + dx;
-                    const y = parseInt(player.style.top || 0) + dy;
+            let lastUpdate = 0;
+            function movePlayer(timestamp) {
+                if (timestamp - lastUpdate > 50) { // Ограничиваем частоту отправки сообщений
+                    let dx = 0;
+                    let dy = 0;
                     
-                    // Проверка границ
-                    if (x >= 0 && x <= gameArea.offsetWidth - 30) {
-                        player.style.left = x + 'px';
+                    if (keys['w'] || keys['ц']) dy -= speed;
+                    if (keys['s'] || keys['ы']) dy += speed;
+                    if (keys['a'] || keys['ф']) dx -= speed;
+                    if (keys['d'] || keys['в']) dx += speed;
+                    
+                    if ((dx !== 0 || dy !== 0) && players[currentPlayerId]) {
+                        const player = players[currentPlayerId];
+                        const x = parseInt(player.style.left || 0) + dx;
+                        const y = parseInt(player.style.top || 0) + dy;
+                        
+                        // Проверка границ
+                        if (x >= 0 && x <= gameArea.offsetWidth - 30) {
+                            player.style.left = x + 'px';
+                        }
+                        
+                        if (y >= 0 && y <= gameArea.offsetHeight - 30) {
+                            player.style.top = y + 'px';
+                        }
+                        
+                        // Обновление направления
+                        updatePlayerDirection(player, dx, dy);
+                        
+                        // Отправка информации о движении на сервер
+                        if (socket && socket.readyState === WebSocket.OPEN) {
+                            socket.send(JSON.stringify({
+                                type: 'move',
+                                x: parseInt(player.style.left || 0),
+                                y: parseInt(player.style.top || 0),
+                                dx: dx,
+                                dy: dy
+                            }));
+                        }
+                        
+                        lastUpdate = timestamp;
                     }
-                    
-                    if (y >= 0 && y <= gameArea.offsetHeight - 30) {
-                        player.style.top = y + 'px';
-                    }
-                    
-                    // Обновление направления
-                    updatePlayerDirection(player, dx, dy);
                 }
                 
                 requestAnimationFrame(movePlayer);
             }
             
-            movePlayer();
+            movePlayer(0);
             
             // Отправка сообщения в чат
             function sendMessage() {
                 const message = chatInput.value.trim();
-                if (message) {
+                if (message && socket && socket.readyState === WebSocket.OPEN) {
+                    // Отправка сообщения на сервер
+                    socket.send(JSON.stringify({
+                        type: 'chat',
+                        message: message
+                    }));
+                    
+                    chatInput.value = '';
+                } else if (message) {
+                    // Локальное сообщение, если нет подключения
                     addMessage(randomName, message);
                     chatInput.value = '';
                 }
@@ -287,11 +473,12 @@
             chatInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     sendMessage();
+                    chatInput.blur(); // Убираем фокус после отправки
                 }
             });
             
-            // Фокус на поле ввода чата
-            chatInput.focus();
+            // Обработчик кнопки подключения
+            connectButton.addEventListener('click', connectToServer);
             
             // Функция создания игрока
             function createPlayer(name, x, y, isCurrentPlayer = false) {
@@ -317,36 +504,6 @@
                 player.style.top = y + 'px';
                 
                 return player;
-            }
-            
-            // Функция создания NPC
-            function createNPC(name, x, y, color) {
-                const npc = createPlayer(name, x, y);
-                npc.querySelector('.player-body').style.backgroundColor = color;
-                gameArea.appendChild(npc);
-                
-                // Простое движение NPC
-                let dx = (Math.random() - 0.5) * 2;
-                let dy = (Math.random() - 0.5) * 2;
-                
-                function moveNPC() {
-                    let newX = parseInt(npc.style.left || 0) + dx;
-                    let newY = parseInt(npc.style.top || 0) + dy;
-                    
-                    // Отскок от границ
-                    if (newX <= 0 || newX >= gameArea.offsetWidth - 30) dx *= -1;
-                    if (newY <= 0 || newY >= gameArea.offsetHeight - 30) dy *= -1;
-                    
-                    npc.style.left = (parseInt(npc.style.left || 0) + dx) + 'px';
-                    npc.style.top = (parseInt(npc.style.top || 0) + dy) + 'px';
-                    
-                    // Обновление направления
-                    updatePlayerDirection(npc, dx, dy);
-                    
-                    setTimeout(moveNPC, 50);
-                }
-                
-                moveNPC();
             }
             
             // Функция обновления направления игрока
@@ -385,34 +542,6 @@
                 // Прокрутка к последнему сообщению
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-            
-            // Генерация случайных сообщений от NPC
-            function generateRandomMessages() {
-                const messages = [
-                    'Привет! Как дела?',
-                    'Кто хочет объединиться?',
-                    'Ищу группу для прохождения',
-                    'Отличная игра!',
-                    'Куда дальше идти?',
-                    'Помогите с управлением!',
-                    'Есть какие-нибудь советы?',
-                    'Я новичок здесь',
-                    'Кто уже прошел игру?',
-                    'Добавьте меня в друзья!'
-                ];
-                
-                const npcNames = ['Зеленый Воин', 'Синий Странник', 'Красный Маг', 'Желтый Путник'];
-                
-                setInterval(() => {
-                    if (Math.random() > 0.7) {
-                        const name = npcNames[Math.floor(Math.random() * npcNames.length)];
-                        const message = messages[Math.floor(Math.random() * messages.length)];
-                        addMessage(name, message);
-                    }
-                }, 5000);
-            }
-            
-            generateRandomMessages();
         });
     </script>
 </body>
