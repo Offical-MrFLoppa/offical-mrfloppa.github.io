@@ -1,8 +1,291 @@
-<html
-  ><head>
-    
-  </head>
-  <body>
-    test
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Cube by Offical-MrFLoppa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .header {
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .cube-container {
+            perspective: 1000px;
+            margin: 40px auto;
+            width: 200px;
+            height: 200px;
+        }
+        
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-25deg) rotateY(-25deg);
+            transition: transform 0.5s ease;
+        }
+        
+        .face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            backface-visibility: visible;
+        }
+        
+        .front  { transform: translateZ(100px); }
+        .back   { transform: rotateY(180deg) translateZ(100px); }
+        .right  { transform: rotateY(90deg) translateZ(100px); }
+        .left   { transform: rotateY(-90deg) translateZ(100px); }
+        .top    { transform: rotateX(90deg) translateZ(100px); }
+        .bottom { transform: rotateX(-90deg) translateZ(100px); }
+        
+        .controls {
+            color: white;
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+        
+        .controls p {
+            margin: 10px 0;
+            opacity: 0.9;
+        }
+        
+        .creator {
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 40px;
+            font-size: 0.9em;
+        }
+        
+        /* Адаптивность для мобильных */
+        @media (max-width: 600px) {
+            .cube-container {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .face {
+                width: 150px;
+                height: 150px;
+                font-size: 1.5em;
+            }
+            
+            .front  { transform: translateZ(75px); }
+            .back   { transform: rotateY(180deg) translateZ(75px); }
+            .right  { transform: rotateY(90deg) translateZ(75px); }
+            .left   { transform: rotateY(-90deg) translateZ(75px); }
+            .top    { transform: rotateX(90deg) translateZ(75px); }
+            .bottom { transform: rotateX(-90deg) translateZ(75px); }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 3D Cube</h1>
+            <p>Двигайте мышью или пальцем для вращения</p>
+        </div>
+        
+        <div class="cube-container">
+            <div class="cube" id="cube">
+                <div class="face front">F</div>
+                <div class="face back">B</div>
+                <div class="face right">R</div>
+                <div class="face left">L</div>
+                <div class="face top">T</div>
+                <div class="face bottom">D</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <p>📱 На телефоне: двигайте пальцем по экрану</p>
+            <p>🖱️ На компьютере: двигайте мышью</p>
+        </div>
+        
+        <div class="creator">
+            Created by Offical-MrFLoppa 🦊 | 2024
+        </div>
+    </div>
+
+    <script>
+    // ==================== 3D CUBE ROTATION ====================
+    const cube = document.getElementById('cube');
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    let rotation = { x: -25, y: -25 };
+    let autoRotate = true;
+    let autoRotationSpeed = 0.5;
+
+    // Функция для обновления вращения куба
+    function updateCubeRotation() {
+        cube.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
+    }
+
+    // Автоматическое вращение
+    function autoRotateCube() {
+        if (autoRotate) {
+            rotation.y += autoRotationSpeed;
+            updateCubeRotation();
+        }
+        requestAnimationFrame(autoRotateCube);
+    }
+
+    // Обработчики для ПК (мышь)
+    function handleMouseDown(e) {
+        isDragging = true;
+        previousMousePosition = {
+            x: e.clientX,
+            y: e.clientY
+        };
+        autoRotate = false;
+        e.preventDefault();
+    }
+
+    function handleMouseMove(e) {
+        if (!isDragging) return;
+        
+        const deltaMove = {
+            x: e.clientX - previousMousePosition.x,
+            y: e.clientY - previousMousePosition.y
+        };
+        
+        rotation.y += deltaMove.x * 0.5;
+        rotation.x += deltaMove.y * 0.5;
+        
+        // Ограничиваем вращение по X чтобы не переворачивать куб
+        rotation.x = Math.max(-90, Math.min(90, rotation.x));
+        
+        previousMousePosition = {
+            x: e.clientX,
+            y: e.clientY
+        };
+        
+        updateCubeRotation();
+    }
+
+    function handleMouseUp() {
+        isDragging = false;
+        // Через 2 секунды возобновляем автоматическое вращение
+        setTimeout(() => { autoRotate = true; }, 2000);
+    }
+
+    // Обработчики для мобильных (тач)
+    function handleTouchStart(e) {
+        isDragging = true;
+        previousMousePosition = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+        };
+        autoRotate = false;
+        e.preventDefault();
+    }
+
+    function handleTouchMove(e) {
+        if (!isDragging) return;
+        
+        const deltaMove = {
+            x: e.touches[0].clientX - previousMousePosition.x,
+            y: e.touches[0].clientY - previousMousePosition.y
+        };
+        
+        rotation.y += deltaMove.x * 0.5;
+        rotation.x += deltaMove.y * 0.5;
+        
+        // Ограничиваем вращение по X
+        rotation.x = Math.max(-90, Math.min(90, rotation.x));
+        
+        previousMousePosition = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+        };
+        
+        updateCubeRotation();
+        e.preventDefault();
+    }
+
+    function handleTouchEnd() {
+        isDragging = false;
+        setTimeout(() => { autoRotate = true; }, 2000);
+    }
+
+    // Добавляем обработчики событий для ПК
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    // Добавляем обработчики событий для мобильных
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchend', handleTouchEnd);
+
+    // Предотвращаем скролл при взаимодействии с кубом
+    document.addEventListener('touchmove', function(e) {
+        if (isDragging) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // Запускаем автоматическое вращение
+    updateCubeRotation();
+    autoRotateCube();
+
+    // Добавляем обработчик для клика (переключение автоматического вращения)
+    cube.addEventListener('click', function() {
+        autoRotate = !autoRotate;
+    });
+
+    // Информация в консоль
+    console.log('🎮 3D Cube by Offical-MrFLoppa');
+    console.log('🖱️ Drag to rotate | 📱 Touch to rotate');
+    </script>
 </body>
 </html>
