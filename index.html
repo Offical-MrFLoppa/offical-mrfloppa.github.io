@@ -3,481 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat by Offical-MrFLoppa</title>
+    <title>2D Мультиплеер</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            padding: 20px;
-            color: white;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 800px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-        
-        /* Форма входа */
-        .login-form {
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .login-form h2 {
-            margin-bottom: 20px;
-            color: #ffd700;
-        }
-        
-        .nickname-input {
-            width: 300px;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            margin: 10px 0;
-            background: rgba(255, 255, 255, 0.9);
-            text-align: center;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            color: white;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-            margin: 10px;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn-start {
-            background: linear-gradient(135deg, #00b894, #00a382);
-        }
-        
-        /* Чат */
-        .chat-container {
-            display: none;
-            flex-direction: column;
-            height: 600px;
-        }
-        
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px 10px 0 0;
-            margin-bottom: 10px;
+            padding: 20px;
+            overflow: hidden;
         }
         
-        .online-count {
-            background: rgba(0, 255, 0, 0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-        }
-        
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.2);
+        .game-container {
+            width: 1000px;
+            height: 600px;
+            background-color: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
-            margin-bottom: 15px;
+            overflow: hidden;
+            display: flex;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-area {
+            flex: 3;
+            position: relative;
+            background-color: #2c3e50;
+            overflow: hidden;
+        }
+        
+        .chat-area {
+            flex: 1;
+            background-color: #34495e;
+            display: flex;
+            flex-direction: column;
+            border-left: 2px solid #7f8c8d;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            color: #ecf0f1;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #2c3e50;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #ecf0f1;
+        }
+        
+        .chat-input button {
+            margin-left: 10px;
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .chat-input button:hover {
+            background-color: #2980b9;
+        }
+        
+        .player {
+            position: absolute;
+            transition: transform 0.2s;
+        }
+        
+        .player-body {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        .player-direction {
+            width: 10px;
+            height: 10px;
+            background-color: #34495e;
+            position: absolute;
+            top: -5px;
+            left: 10px;
+            border-radius: 50%;
+        }
+        
+        .player-name {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 12px;
+            white-space: nowrap;
+            text-shadow: 1px 1px 2px black;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
         }
         
         .message {
-            margin-bottom: 15px;
-            padding: 12px;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            animation: fadeIn 0.3s ease;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            background-color: rgba(52, 152, 219, 0.2);
         }
         
-        .message.my-message {
-            background: rgba(74, 144, 226, 0.3);
-            margin-left: 50px;
-        }
-        
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-        
-        .username {
+        .message .sender {
             font-weight: bold;
-            color: #ffd700;
+            color: #3498db;
         }
         
-        .message-time {
-            font-size: 0.8em;
+        .message .text {
+            color: #ecf0f1;
         }
         
-        .message-text {
-            word-wrap: break-word;
-        }
-        
-        .input-area {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .message-input {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1em;
-            background: rgba(255, 255, 255, 0.9);
-        }
-        
-        .send-btn {
-            padding: 15px 25px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #00b894, #00a382);
+        .game-title {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
             color: white;
-            cursor: pointer;
-            font-weight: bold;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-        
-        /* Анимации */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Адаптивность */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
-            }
-            
-            .nickname-input {
-                width: 100%;
-            }
-            
-            .chat-container {
-                height: 500px;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-        }
-        
-        /* Полоса прокрутки */
-        .messages::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .messages::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-        
-        .messages::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-        
-        .messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
+        .obstacle {
+            position: absolute;
+            background-color: #7f8c8d;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>💬 Floppa Chat</h1>
-            <p>Общий чат с сохранением сообщений</p>
+    <div class="game-container">
+        <div class="game-area" id="gameArea">
+            <div class="game-title">2D Мультиплеер</div>
+            <!-- Игроки будут добавляться здесь -->
         </div>
         
-        <!-- Форма входа -->
-        <div class="login-form" id="loginForm">
-            <h2>Выберите никнейм</h2>
-            <input type="text" class="nickname-input" id="nicknameInput" placeholder="Ваш никнейм" maxlength="20">
-            <br>
-            <button class="btn btn-start" onclick="joinChat()">Присоединиться к чату</button>
-        </div>
-        
-        <!-- Чат -->
-        <div class="chat-container" id="chatContainer">
-            <div class="chat-header">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">FL</div>
-                    <span id="currentUsername">Гость</span>
+        <div class="chat-area">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message">
+                    <span class="sender">Система:</span>
+                    <span class="text">Добро пожаловать в игру! Используйте WASD для движения.</span>
                 </div>
-                <div class="online-count">👥 <span id="onlineCount">1</span> онлайн</div>
             </div>
             
-            <div class="messages" id="messagesContainer">
-                <!-- Сообщения будут здесь -->
-            </div>
-            
-            <div class="input-area">
-                <input type="text" class="message-input" id="messageInput" placeholder="Напишите сообщение..." maxlength="500">
-                <button class="send-btn" onclick="sendMessage()">Отправить</button>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Введите сообщение...">
+                <button id="sendButton">Отпр.</button>
             </div>
         </div>
     </div>
+    
+    <div class="controls">
+        Управление: WASD<br>
+        Игрок: <span id="playerName">Вы</span>
+    </div>
 
     <script>
-    // ==================== CHAT SYSTEM ====================
-    let currentUser = null;
-    let messages = [];
-    let onlineUsers = 1;
-
-    // Инициализация при загрузке
-    function init() {
-        // Проверяем, есть ли сохраненный ник
-        const savedNickname = localStorage.getItem('chat_nickname');
-        if (savedNickname) {
-            document.getElementById('nicknameInput').value = savedNickname;
-        }
-        
-        // Загружаем сообщения из LocalStorage
-        loadMessages();
-        
-        // Обновляем счетчик онлайн
-        updateOnlineCount();
-        
-        // Фокус на поле ввода
-        document.getElementById('nicknameInput').focus();
-        
-        // Обработка Enter в поле ввода
-        document.getElementById('nicknameInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                joinChat();
-            }
-        });
-        
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    }
-
-    // Присоединение к чату
-    function joinChat() {
-        const nickname = document.getElementById('nicknameInput').value.trim();
-        
-        if (!nickname) {
-            alert('Пожалуйста, введите никнейм!');
-            return;
-        }
-        
-        if (nickname.length < 2) {
-            alert('Никнейм должен быть至少 2 символа!');
-            return;
-        }
-        
-        // Сохраняем никнейм
-        currentUser = nickname;
-        localStorage.setItem('chat_nickname', nickname);
-        
-        // Показываем чат
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('chatContainer').style.display = 'flex';
-        
-        // Обновляем аватар и имя
-        document.getElementById('currentUsername').textContent = nickname;
-        document.getElementById('userAvatar').textContent = nickname.substring(0, 2).toUpperCase();
-        
-        // Фокус на поле сообщения
-        document.getElementById('messageInput').focus();
-        
-        // Добавляем сообщение о входе
-        addSystemMessage(`${nickname} присоединился к чату`);
-    }
-
-    // Отправка сообщения
-    function sendMessage() {
-        const messageInput = document.getElementById('messageInput');
-        const text = messageInput.value.trim();
-        
-        if (!text) return;
-        
-        if (!currentUser) {
-            alert('Сначала выберите никнейм!');
-            return;
-        }
-        
-        // Создаем сообщение
-        const message = {
-            id: Date.now(),
-            user: currentUser,
-            text: text,
-            timestamp: new Date().toLocaleTimeString(),
-            isSystem: false
-        };
-        
-        // Добавляем сообщение
-        addMessage(message);
-        
-        // Очищаем поле ввода
-        messageInput.value = '';
-    }
-
-    // Добавление сообщения в чат
-    function addMessage(message) {
-        // Добавляем в массив
-        messages.push(message);
-        
-        // Сохраняем в LocalStorage
-        saveMessages();
-        
-        // Создаем HTML элемент
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message' + (message.user === currentUser ? ' my-message' : '');
-        
-        messageDiv.innerHTML = `
-            <div class="message-header">
-                <span class="username">${message.isSystem ? '⚡' : message.user}</span>
-                <span class="message-time">${message.timestamp}</span>
-            </div>
-            <div class="message-text">${escapeHtml(message.text)}</div>
-        `;
-        
-        // Добавляем в контейнер
-        document.getElementById('messagesContainer').appendChild(messageDiv);
-        
-        // Прокручиваем вниз
-        scrollToBottom();
-    }
-
-    // Системное сообщение
-    function addSystemMessage(text) {
-        const message = {
-            id: Date.now(),
-            user: 'System',
-            text: text,
-            timestamp: new Date().toLocaleTimeString(),
-            isSystem: true
-        };
-        
-        addMessage(message);
-    }
-
-    // Сохранение сообщений
-    function saveMessages() {
-        // Сохраняем только последние 100 сообщений
-        const recentMessages = messages.slice(-100);
-        localStorage.setItem('chat_messages', JSON.stringify(recentMessages));
-    }
-
-    // Загрузка сообщений
-    function loadMessages() {
-        const savedMessages = localStorage.getItem('chat_messages');
-        if (savedMessages) {
-            messages = JSON.parse(savedMessages);
+        document.addEventListener('DOMContentLoaded', function() {
+            const gameArea = document.getElementById('gameArea');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const sendButton = document.getElementById('sendButton');
+            const playerNameDisplay = document.getElementById('playerName');
             
-            // Показываем сообщения
-            messages.forEach(message => {
-                addMessage(message);
+            // Генерация случайного имени игрока
+            const adjectives = ['Быстрый', 'Смелый', 'Ловкий', 'Хитрый', 'Сильный', 'Невидимый', 'Отважный'];
+            const nouns = ['Воин', 'Странник', 'Игрок', 'Путник', 'Герой', 'Следопыт', 'Маг'];
+            const randomName = adjectives[Math.floor(Math.random() * adjectives.length)] + ' ' + nouns[Math.floor(Math.random() * nouns.length)];
+            playerNameDisplay.textContent = randomName;
+            
+            // Создаем препятствия
+            function createObstacles() {
+                for (let i = 0; i < 10; i++) {
+                    const obstacle = document.createElement('div');
+                    obstacle.className = 'obstacle';
+                    
+                    const size = Math.random() * 50 + 30;
+                    obstacle.style.width = size + 'px';
+                    obstacle.style.height = size + 'px';
+                    
+                    obstacle.style.left = Math.random() * (gameArea.offsetWidth - size) + 'px';
+                    obstacle.style.top = Math.random() * (gameArea.offsetHeight - size) + 'px';
+                    
+                    gameArea.appendChild(obstacle);
+                }
+            }
+            
+            createObstacles();
+            
+            // Создаем игрока
+            const player = createPlayer(randomName, gameArea.offsetWidth / 2, gameArea.offsetHeight / 2, true);
+            gameArea.appendChild(player);
+            
+            // Создаем несколько NPC для демонстрации
+            createNPC('Зеленый Воин', 100, 100, '#2ecc71');
+            createNPC('Синий Странник', 300, 200, '#3498db');
+            createNPC('Красный Маг', 500, 350, '#e74c3c');
+            createNPC('Желтый Путник', 200, 400, '#f1c40f');
+            
+            // Обработка ввода с клавиатуры
+            const keys = {};
+            document.addEventListener('keydown', function(e) {
+                keys[e.key.toLowerCase()] = true;
             });
-        }
-    }
-
-    // Обновление счетчика онлайн
-    function updateOnlineCount() {
-        // Симуляция онлайн пользователей
-        onlineUsers = 1 + Math.floor(Math.random() * 10);
-        document.getElementById('onlineCount').textContent = onlineUsers;
-    }
-
-    // Прокрутка вниз
-    function scrollToBottom() {
-        const container = document.getElementById('messagesContainer');
-        container.scrollTop = container.scrollHeight;
-    }
-
-    // Экранирование HTML
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // Автосохранение каждые 30 секунд
-    setInterval(saveMessages, 30000);
-
-    // Обновление онлайн счётчика каждую минуту
-    setInterval(updateOnlineCount, 60000);
-
-    // Инициализация при загрузке
-    window.onload = init;
-
-    // Информация в консоль
-    console.log('💬 Floppa Chat by Offical-MrFLoppa');
-    console.log('📝 Сообщения сохраняются в LocalStorage');
+            
+            document.addEventListener('keyup', function(e) {
+                keys[e.key.toLowerCase()] = false;
+            });
+            
+            // Движение игрока
+            const speed = 5;
+            function movePlayer() {
+                let dx = 0;
+                let dy = 0;
+                
+                if (keys['w']) dy -= speed;
+                if (keys['s']) dy += speed;
+                if (keys['a']) dx -= speed;
+                if (keys['d']) dx += speed;
+                
+                if (dx !== 0 || dy !== 0) {
+                    const x = parseInt(player.style.left || 0) + dx;
+                    const y = parseInt(player.style.top || 0) + dy;
+                    
+                    // Проверка границ
+                    if (x >= 0 && x <= gameArea.offsetWidth - 30) {
+                        player.style.left = x + 'px';
+                    }
+                    
+                    if (y >= 0 && y <= gameArea.offsetHeight - 30) {
+                        player.style.top = y + 'px';
+                    }
+                    
+                    // Обновление направления
+                    updatePlayerDirection(player, dx, dy);
+                }
+                
+                requestAnimationFrame(movePlayer);
+            }
+            
+            movePlayer();
+            
+            // Отправка сообщения в чат
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (message) {
+                    addMessage(randomName, message);
+                    chatInput.value = '';
+                }
+            }
+            
+            sendButton.addEventListener('click', sendMessage);
+            
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Фокус на поле ввода чата
+            chatInput.focus();
+            
+            // Функция создания игрока
+            function createPlayer(name, x, y, isCurrentPlayer = false) {
+                const player = document.createElement('div');
+                player.className = 'player';
+                
+                const playerBody = document.createElement('div');
+                playerBody.className = 'player-body';
+                playerBody.style.backgroundColor = isCurrentPlayer ? '#e74c3c' : '#3498db';
+                
+                const playerDirection = document.createElement('div');
+                playerDirection.className = 'player-direction';
+                
+                const playerName = document.createElement('div');
+                playerName.className = 'player-name';
+                playerName.textContent = name;
+                
+                player.appendChild(playerBody);
+                player.appendChild(playerDirection);
+                player.appendChild(playerName);
+                
+                player.style.left = x + 'px';
+                player.style.top = y + 'px';
+                
+                return player;
+            }
+            
+            // Функция создания NPC
+            function createNPC(name, x, y, color) {
+                const npc = createPlayer(name, x, y);
+                npc.querySelector('.player-body').style.backgroundColor = color;
+                gameArea.appendChild(npc);
+                
+                // Простое движение NPC
+                let dx = (Math.random() - 0.5) * 2;
+                let dy = (Math.random() - 0.5) * 2;
+                
+                function moveNPC() {
+                    let newX = parseInt(npc.style.left || 0) + dx;
+                    let newY = parseInt(npc.style.top || 0) + dy;
+                    
+                    // Отскок от границ
+                    if (newX <= 0 || newX >= gameArea.offsetWidth - 30) dx *= -1;
+                    if (newY <= 0 || newY >= gameArea.offsetHeight - 30) dy *= -1;
+                    
+                    npc.style.left = (parseInt(npc.style.left || 0) + dx) + 'px';
+                    npc.style.top = (parseInt(npc.style.top || 0) + dy) + 'px';
+                    
+                    // Обновление направления
+                    updatePlayerDirection(npc, dx, dy);
+                    
+                    setTimeout(moveNPC, 50);
+                }
+                
+                moveNPC();
+            }
+            
+            // Функция обновления направления игрока
+            function updatePlayerDirection(playerElement, dx, dy) {
+                const directionElement = playerElement.querySelector('.player-direction');
+                
+                // Вычисляем угол направления
+                const angle = Math.atan2(dy, dx);
+                const distance = 15;
+                
+                // Позиционируем индикатор направления
+                const x = 15 + Math.cos(angle) * distance;
+                const y = 15 + Math.sin(angle) * distance;
+                
+                directionElement.style.transform = `translate(${x - 15}px, ${y - 15}px)`;
+            }
+            
+            // Функция добавления сообщения в чат
+            function addMessage(sender, text) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message';
+                
+                const senderElement = document.createElement('span');
+                senderElement.className = 'sender';
+                senderElement.textContent = sender + ':';
+                
+                const textElement = document.createElement('span');
+                textElement.className = 'text';
+                textElement.textContent = ' ' + text;
+                
+                messageElement.appendChild(senderElement);
+                messageElement.appendChild(textElement);
+                
+                chatMessages.appendChild(messageElement);
+                
+                // Прокрутка к последнему сообщению
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Генерация случайных сообщений от NPC
+            function generateRandomMessages() {
+                const messages = [
+                    'Привет! Как дела?',
+                    'Кто хочет объединиться?',
+                    'Ищу группу для прохождения',
+                    'Отличная игра!',
+                    'Куда дальше идти?',
+                    'Помогите с управлением!',
+                    'Есть какие-нибудь советы?',
+                    'Я новичок здесь',
+                    'Кто уже прошел игру?',
+                    'Добавьте меня в друзья!'
+                ];
+                
+                const npcNames = ['Зеленый Воин', 'Синий Странник', 'Красный Маг', 'Желтый Путник'];
+                
+                setInterval(() => {
+                    if (Math.random() > 0.7) {
+                        const name = npcNames[Math.floor(Math.random() * npcNames.length)];
+                        const message = messages[Math.floor(Math.random() * messages.length)];
+                        addMessage(name, message);
+                    }
+                }, 5000);
+            }
+            
+            generateRandomMessages();
+        });
     </script>
 </body>
 </html>
